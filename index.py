@@ -178,7 +178,7 @@ def laporan() :
     # using csv.writer method from CSV package
     write = csv.writer(f)
       
-    write.writerow(['PC', 'tanggal', 'Waktu', 'Harga'])
+    write.writerow(['PC', 'Tanggal', 'Waktu', 'Harga'])
     write.writerows(
       list(
         map(lambda b: ['PC ' + b.get('PC'), b.get('tanggal'), b.get('dari') + '-' + b.get('sampai'), b.get('harga')], select('billing'))
