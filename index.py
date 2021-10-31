@@ -25,7 +25,7 @@ def saldo() :
   jumlah = 0
 
   billing = select('billing')
-  for i in billing :
+  for i in range(len(billing)) :
     jumlah += billing[i].get('harga')
 
   return jumlah
@@ -56,6 +56,7 @@ def daftar_menu() :
   print('[6] Laporan')
   print('[7] Selesai')
   print('[8] Logout')
+  print(f'Saldo Rp {saldo()}')
 
   menu = int(input('Masukan menu yang ingin dipilih : '))
   print()
@@ -115,7 +116,7 @@ def tambah_billing() :
   pc = int(input('PC (No) : '))
   dari = input('Dari jam : ')
   sampai = input('Sampai jam : ')
-  harga = input('Harga : ')
+  harga = int(input('Harga : '))
 
   # Jika nomor PC salah, coba lagi
   if pc - 1 < len(pc_tersedia) :
@@ -163,7 +164,7 @@ def laporan() :
     write.writerow(['PC', 'Waktu', 'Harga'])
     write.writerows(
       list(
-        map(lambda b: [b.get('PC'), b.get('dari') + '-' + b.get('sampai'), b.get('harga')], select('billing'))
+        map(lambda b: ['PC ' + b.get('PC'), b.get('dari') + '-' + b.get('sampai'), b.get('harga')], select('billing'))
       )
     )
 
