@@ -1,5 +1,6 @@
 from prettytable import PrettyTable
 from datetime import date, datetime
+import os
 import csv
 
 # Simulasi database
@@ -34,8 +35,8 @@ def saldo() :
 def waktu_sekarang() :
   return datetime.now().strftime('%H:%M')
 
-def tanggal_sekarang() :
-  return date.today().strftime('%d-%m-%Y')
+def tanggal_sekarang(format = "-") :
+  return date.today().strftime(f'%d{format}%m{format}%Y')
 
 # Login, jika berhasil akan mereturn True
 def login() :
@@ -60,9 +61,9 @@ def daftar_menu() :
   print('[3] Tambah Billing')
   print('[4] Hapus Billing')
   print('[5] Tambah Akun')
-  print('[6] Laporan')
-  print('[7] Selesai')
-  print('[8] Logout')
+  print('[6] Laporan (CSV)')
+  print('[7] Logout')
+  print('[8] Selesai')
   print(f'Saldo Rp {saldo()}')
 
   menu = int(input('Masukan menu yang ingin dipilih : '))
@@ -172,7 +173,8 @@ def tambah_akun() :
 def laporan() :
   # sumber https://www.codegrepper.com/code-examples/python/save+list+in+csv+file+python
 
-  with open('laporan.csv', 'w', newline='') as f:
+  nama_file_laporan = f'laporan_{tanggal_sekarang("_")}.csv'
+  with open(nama_file_laporan, 'w', newline='') as f:
     # using csv.writer method from CSV package
     write = csv.writer(f)
       
@@ -182,6 +184,8 @@ def laporan() :
         map(lambda b: ['PC ' + b.get('PC'), b.get('tanggal'), b.get('dari') + '-' + b.get('sampai'), b.get('harga')], select('billing'))
       )
     )
+
+    print(f'File laporan sudah tersimpan di :\n{os.path.dirname(os.path.abspath(__file__))}/{nama_file_laporan}')
 
 def app() :
   if login() : # Jika berhasil login
@@ -203,9 +207,9 @@ def app() :
       elif menu == 6 :
         laporan()
       elif menu == 7 :
-        aplikasi_selesai = True
-      elif menu == 8 :
         return app()
+      elif menu == 8 :
+        aplikasi_selesai = True
       else :
         print('Masukan pilihan yang tersedia')
   
