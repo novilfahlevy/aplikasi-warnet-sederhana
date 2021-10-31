@@ -99,7 +99,7 @@ def daftar_billing() :
 # Daftar PC yang tersedia, dengan membandingkan tabel PC dan billing
 def PC_tersedia() :
   pc_terpakai = list(map(lambda billing: billing.get('PC'), select('billing')))
-  return list(filter(lambda PC: PC not in pc_terpakai, select('PC')))
+  return list(filter(lambda pc: pc not in pc_terpakai, select('PC')))
 
 # Tambah billing
 def tambah_billing() :
@@ -189,7 +189,7 @@ def app() :
         laporan()
       elif menu == 7 :
         aplikasi_selesai = True
-      elif menu == 7 :
+      elif menu == 8 :
         return app()
       else :
         print('Masukan pilihan yang tersedia')
