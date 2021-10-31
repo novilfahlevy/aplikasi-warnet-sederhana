@@ -1,4 +1,5 @@
 from prettytable import PrettyTable
+from datetime import date, datetime
 import csv
 
 # Simulasi database
@@ -9,7 +10,7 @@ database = {
   ],
   'PC': ['1', '2', '3', '4', '5', '6'],
   'billing': [
-    { 'PC': '1', 'dari': '12:00', 'sampai': '14:00', 'harga': 3000 }
+    { 'PC': '1', 'tanggal': '31-10-2021', 'dari': '12:00', 'sampai': '14:00', 'harga': 3000 }
   ]
 }
 
@@ -29,6 +30,12 @@ def saldo() :
     jumlah += billing[i].get('harga')
 
   return jumlah
+
+def waktu_sekarang() :
+  return datetime.now().strftime('%H:%M')
+
+def tanggal_sekarang() :
+  return date.today().strftime('%d-%m-%Y')
 
 # Login, jika berhasil akan mereturn True
 def login() :
@@ -69,12 +76,13 @@ def daftar_PC() :
   table = PrettyTable()
   table.field_names = ['No', 'PC', 'Status']
 
+  # Cek apakah pc tersedia atau masih dipakai
   pc = select('PC');
   for i in range(len(pc)) :
     if pc[i] not in PC_tersedia() :
-      table.add_row([i + 1, f'PC {pc[i]}', 'Billed'])
+      table.add_row([i + 1, f'PC {pc[i]}', 'Dipakai'])
     else :
-      table.add_row([i + 1, f'PC {pc[i]}', 'Free'])
+      table.add_row([i + 1, f'PC {pc[i]}', 'Tersedia'])
 
   print(table)
 
@@ -83,17 +91,22 @@ def daftar_billing() :
   print('Daftar Billing :')
 
   table = PrettyTable()
-  table.field_names = ['No', 'PC', 'Waktu', 'Harga']
+  table.field_names = ['No', 'PC', 'Tanggal', 'Waktu', 'Harga', 'Status']
 
   billing = select('billing');
   for i in range(len(billing)) :
     pc = billing[i].get('PC')
+    tanggal = billing[i].get('tanggal')
     dari = billing[i].get('dari')
     sampai = billing[i].get('sampai')
     harga = billing[i].get('harga')
 
-    table.add_row([i + 1, f'PC {pc}', f'{dari}-{sampai}', f'Rp {harga}'])
-
+    # Cek apakah billing masih berlangsung atau sudah selesai
+    if f'{tanggal_sekarang()} {waktu_sekarang()}' > f'{tanggal} {dari}' :
+      table.add_row([i + 1, f'PC {pc}', tanggal, f'{dari}-{sampai}', f'Rp {harga}', 'Selesai'])
+    else :
+      table.add_row([i + 1, f'PC {pc}', tanggal, f'{dari}-{sampai}', f'Rp {harga}', 'Berlangsung'])
+    
   print(table)
 
 # Daftar PC yang tersedia, dengan membandingkan tabel PC dan billing
@@ -113,14 +126,16 @@ def tambah_billing() :
   print('PC yang tersedia : ')
   print(table_PC_tersedia)
 
+  sekarang = waktu_sekarang()
   pc = int(input('PC (No) : '))
-  dari = input('Dari jam : ')
+  tanggal = tanggal_sekarang()
+  dari = input(f'Dari jam ({sekarang}) : ') or sekarang
   sampai = input('Sampai jam : ')
   harga = int(input('Harga : '))
 
   # Jika nomor PC salah, coba lagi
   if pc - 1 < len(pc_tersedia) :
-    insert('billing', { 'PC': pc_tersedia[pc - 1], 'dari': dari, 'sampai': sampai, 'harga': harga })
+    insert('billing', { 'PC': pc_tersedia[pc - 1], 'tanggal': tanggal, 'dari': dari, 'sampai': sampai, 'harga': harga })
     print('Billing berhasil ditambah')
   else :
     print('Mohon pilih PC yang tersedia\n')
@@ -161,10 +176,10 @@ def laporan() :
     # using csv.writer method from CSV package
     write = csv.writer(f)
       
-    write.writerow(['PC', 'Waktu', 'Harga'])
+    write.writerow(['PC', 'tanggal', 'Waktu', 'Harga'])
     write.writerows(
       list(
-        map(lambda b: ['PC ' + b.get('PC'), b.get('dari') + '-' + b.get('sampai'), b.get('harga')], select('billing'))
+        map(lambda b: ['PC ' + b.get('PC'), b.get('tanggal'), b.get('dari') + '-' + b.get('sampai'), b.get('harga')], select('billing'))
       )
     )
 
@@ -196,4 +211,8 @@ def app() :
   
   print('Sampai nanti ^^')
 
-app()
+try :
+  app()
+except KeyboardInterrupt :
+  # Handle exception jika ditekan CTRL + C
+  print('\nSampai nanti ^^')
